@@ -7,6 +7,8 @@ const itemRoutes = require('./item-routes');
 const vendorItemRoutes = require('./vendor-item.routes');
 const vendorRoutes = require('./vendor-routes');
 const authRoutes = require('./auth-routes');
+const roleRoutes = require('./role-routes');
+const adminRoutes = require('./admin-routes');
 
 router.get('/', (req, res) => {
   res.json({ message: 'Welcome to Vendor ERP Backend API' });
@@ -17,5 +19,7 @@ router.use('/', itemRoutes);
 router.use('/vendor-items', vendorItemRoutes);
 router.use('/', vendorRoutes);
 router.use('/', authRoutes);
+router.use('/', roleRoutes);
+router.use('/', adminRoutes);
 
 module.exports = router;

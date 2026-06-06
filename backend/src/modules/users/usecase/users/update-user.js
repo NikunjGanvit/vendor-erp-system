@@ -8,23 +8,21 @@ module.exports = function ({
   UnknownError,
   ValidationError,
   ConflictError,
+  NotFoundError,
 }) {
-  return async function createUser({ userData, createdBy, logger }) {
-    logger?.info({
-      fullname: userData?.fullname,
-      email: userData?.email,
-      role_id: userData?.role_id,
-    }, 'Create User Use Case started');
+  return async function updateUser({ id, userData, updatedBy, logger }) {
+    logger?.info({ id, updatedFields: Object.keys(userData || {}) }, 'updateUser Use Case started');
 
     try {
       const schema = Joi.object({
-        fullname: Joi.string().min(3).max(50).required(),
+        id: Joi.number().integer().positive().required(),
+        fullname: Joi.string().min(3).max(50).optional(),
         email: Joi.string().email().max(40).allow(null, '').optional(),
         password: Joi.string().min(6).max(100).allow(null, '').optional(),
         phone_number: Joi.string().max(20).allow(null, '').optional(),
-        is_active: Joi.boolean().default(false).optional(),
-        meta_data: Joi.object().default({}).optional(),
-        is_employee: Joi.boolean().default(false).optional(),
+        is_active: Joi.boolean().optional(),
+        meta_data: Joi.object().optional(),
+        is_employee: Joi.boolean().optional(),
         role_id: Joi.number().integer().positive().allow(null).optional(),
         unit: Joi.string().length(2).allow(null, '').optional(),
         company_id: Joi.number().integer().positive().allow(null).optional(),
@@ -33,14 +31,13 @@ module.exports = function ({
         designation: Joi.string().allow(null, '').optional(),
       });
 
-      const { error, value } = schema.validate(userData, {
+      const { error, value } = schema.validate({ id, ...userData }, {
         abortEarly: false,
         stripUnknown: true,
       });
 
       if (error) {
-        logger?.warn({ validationErrors: error.details.map((d) => d.message) }, 'Joi validation failed for user creation');
-        const err = new ValidationError('Invalid user input');
+        const err = new ValidationError('Invalid update input');
         err.details = error.details.map((d) => ({
           message: d.message,
           field: d.path.join('.'),
@@ -48,31 +45,36 @@ module.exports = function ({
         throw err;
       }
 
-      const processedUser = value;
+      const { id: validatedId, ...processedUser } = value;
+
+      const existingUser = await userDb.findById({ id: validatedId, logger });
+      if (!existingUser) {
+        throw new NotFoundError('User not found');
+      }
 
       // Duplicate Checks
-      if (processedUser.email) {
-        const existingEmail = await userDb.findByEmail({ email: processedUser.email, logger });
-        if (existingEmail) {
+      if (processedUser.email && processedUser.email !== existingUser.email) {
+        const dup = await userDb.findByEmail({ email: processedUser.email, logger });
+        if (dup && dup.id !== existingUser.id) {
           throw new ConflictError('Email already exists');
         }
       }
 
-      if (processedUser.phone_number) {
-        const existingPhone = await userDb.findByPhone({ phone_number: processedUser.phone_number, logger });
-        if (existingPhone) {
+      if (processedUser.phone_number && processedUser.phone_number !== existingUser.phone_number) {
+        const dup = await userDb.findByPhone({ phone_number: processedUser.phone_number, logger });
+        if (dup && dup.id !== existingUser.id) {
           throw new ConflictError('Phone number already exists');
         }
       }
 
-      if (processedUser.employee_id) {
-        const existingEmpId = await userDb.findByEmployeeId({ employee_id: processedUser.employee_id, logger });
-        if (existingEmpId) {
+      if (processedUser.employee_id && processedUser.employee_id !== existingUser.employee_id) {
+        const dup = await userDb.findByEmployeeId({ employee_id: processedUser.employee_id, logger });
+        if (dup && dup.id !== existingUser.id) {
           throw new ConflictError('Employee ID already exists');
         }
       }
 
-      // Password Hashing
+      // Password Hashing if updated
       if (processedUser.password) {
         try {
           processedUser.password = await bcrypt.hash(processedUser.password, 10);
@@ -84,23 +86,24 @@ module.exports = function ({
 
       const transaction = await sequelize.transaction();
       try {
-        const createdUser = await userDb.createUser({
+        const updatedUser = await userDb.updateUser({
+          id: validatedId,
           userData: {
             ...processedUser,
-            created_by: createdBy,
+            updated_by: updatedBy,
           },
           transaction,
           logger,
         });
 
         await transaction.commit();
-        logger?.info({ id: createdUser.id }, 'User created successfully');
-        return createdUser;
+        logger?.info({ id: validatedId }, 'User updated successfully');
+        return updatedUser;
       } catch (err) {
         if (transaction && transaction.finished !== 'commit') {
           await transaction.rollback();
         }
-        logger?.error({ err: err.message }, 'Database transaction rolled back due to error');
+        logger?.error({ err: err.message }, 'Database transaction rolled back during update');
         throw err;
       }
     } catch (err) {
@@ -108,7 +111,7 @@ module.exports = function ({
       if (err.statusCode) {
         throw err;
       }
-      throw new UnknownError(err.message || 'User creation failed');
+      throw new UnknownError(err.message || 'User update failed');
     }
   };
 };
