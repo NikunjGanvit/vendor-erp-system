@@ -15,6 +15,7 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
+    "eva-utilities": "^11.0.2",
     "express": "^5.2.1",
     "helmet": "^8.2.0",
     "joi": "^18.2.1",
