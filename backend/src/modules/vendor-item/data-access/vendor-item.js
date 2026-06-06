@@ -74,7 +74,7 @@ module.exports = function ({ sequelize, UnknownError }) {
     try {
       const sql = `
         SELECT * FROM vendor_item_master 
-        WHERE vendor_id = $1 AND item_id = $2 AND deleted_at IS NULL 
+        WHERE vendor_id = $1 AND item_id = $2 
         LIMIT 1`;
       const [result] = await sequelize.query(sql, {
         bind: [vendor_id, item_id],
@@ -165,7 +165,7 @@ module.exports = function ({ sequelize, UnknownError }) {
         vendorItemData.vendor_id,
         vendorItemData.item_id,
         vendorItemData.vendor_item_code,
-        vendorItemData.vendor_price,
+        vendorItemData.vendor_price||null,
         vendorItemData.currency,
         vendorItemData.min_order_quantity,
         vendorItemData.lead_time_days,

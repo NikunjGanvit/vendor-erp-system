@@ -1,5 +1,7 @@
 'use strict';
 
+const { buildQueryFromFilters, buildMultiSort, validateFiltersAndSorts } = require('eva-utilities/utils/filter-builder-v2');
+
 module.exports = function ({ sequelize, UnknownError }) {
   return {
     findByItemCode,
@@ -145,13 +147,40 @@ module.exports = function ({ sequelize, UnknownError }) {
     }
   }
 
-  async function getItems({ filter, sort, pagination, logger }) {
+  async function getItems({ filter, filters, sort, pagination, logger }) {
     try {
-      const normalizedFilter = normalizeFilter(filter);
-      const normalizedSort = normalizeSort(sort);
+      const rawFilters = filters ?? filter;
+      let effectiveFilters = rawFilters;
+      let effectiveSort = sort;
 
-      const whereClause = normalizedFilter.clause.trim();
-      const orderClause = normalizedSort.clause.trim();
+      if (Array.isArray(rawFilters) || Array.isArray(sort)) {
+        const validated = validateFiltersAndSorts(Array.isArray(rawFilters) ? rawFilters : [], Array.isArray(sort) ? sort : []);
+        effectiveFilters = validated.filters;
+        effectiveSort = validated.sort;
+      }
+
+      let whereClause = '';
+      let filterParams = [];
+      if (Array.isArray(effectiveFilters) && effectiveFilters.length > 0 && typeof effectiveFilters[0] === 'object') {
+        const built = buildQueryFromFilters(effectiveFilters, 1);
+        whereClause = built.query.trim();
+        filterParams = built.params;
+      } else {
+        const normalizedFilter = normalizeFilter(effectiveFilters);
+        whereClause = normalizedFilter.clause.trim();
+        filterParams = normalizedFilter.params;
+      }
+
+      let orderClause = '';
+      let sortParams = [];
+      if (Array.isArray(effectiveSort) && effectiveSort.length > 0 && typeof effectiveSort[0] === 'object') {
+        orderClause = buildMultiSort(effectiveSort).trim().replace(/^order by\s+/i, '');
+      } else {
+        const normalizedSort = normalizeSort(effectiveSort);
+        orderClause = normalizedSort.clause.trim();
+        sortParams = normalizedSort.params;
+      }
+
       const whereSql = whereClause
         ? whereClause.toLowerCase().startsWith('where ')
           ? whereClause
@@ -163,7 +192,7 @@ module.exports = function ({ sequelize, UnknownError }) {
           : `ORDER BY ${orderClause}`
         : 'ORDER BY id DESC';
 
-      const bindParams = [...normalizedFilter.params, ...normalizedSort.params];
+      const bindParams = [...filterParams, ...sortParams];
       const countSql = `SELECT COUNT(*) AS total FROM public.item_master ${whereSql}`;
       const totalResult = await sequelize.query(countSql, {
         bind: bindParams,

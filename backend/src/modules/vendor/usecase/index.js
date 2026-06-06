@@ -9,7 +9,6 @@ const {
   ConflictError,
   NotFoundError,
 } = require('../../../utils/errors');
-const { buildFilterV2, buildSort } = require('eva-utilities');
 
 const makeCreateVendor = require('./create-vendor');
 const makeGetVendors = require('./get-vendors');
@@ -28,8 +27,6 @@ const createVendor = makeCreateVendor({
 
 const getVendors = makeGetVendors({
   vendorDb,
-  buildFilterV2,
-  buildSort,
   UnknownError,
 });
 

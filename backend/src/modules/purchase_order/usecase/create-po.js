@@ -22,7 +22,6 @@ module.exports = function ({
     try {
       const schema = Joi.object({
         po_number: Joi.string().max(50).required(),
-        vendor_id: Joi.number().required(),
         procurement_officer_id: Joi.number().required(),
         po_date: Joi.date().required(),
         delivery_date: Joi.date().required(),

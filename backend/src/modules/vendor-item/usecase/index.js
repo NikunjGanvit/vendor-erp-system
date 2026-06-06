@@ -3,7 +3,6 @@ const { vendorItemDb } = require('../data-access');
 const { UnknownError, ValidationError, ConflictError } = require('../../../utils/errors');
 const Joi = require('joi');
 const sequelize = require('../../../config/db');
-const { buildFilterV2, buildSort } = require('eva-utilities');
 
 const makeCreateVendorItem = require('./create-vendor-item');
 const makeGetVendorItems = require('./get-vendor-items');
@@ -22,8 +21,6 @@ const createVendorItem = makeCreateVendorItem({
 
 const getVendorItems = makeGetVendorItems({
   vendorItemDb,
-  buildFilterV2,
-  buildSort,
   UnknownError,
 });
 

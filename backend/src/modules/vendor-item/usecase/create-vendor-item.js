@@ -15,7 +15,7 @@ module.exports = function ({
         vendor_id: Joi.number().integer().positive().required(),
         item_id: Joi.number().integer().positive().required(),
         vendor_item_code: Joi.string().max(100).allow(null, ''),
-        vendor_price: Joi.number().positive().required(),
+        vendor_price: Joi.number().optional(),
         currency: Joi.string().length(3).default('INR'),
         min_order_quantity: Joi.number().integer().positive().default(1),
         lead_time_days: Joi.number().integer().allow(null),

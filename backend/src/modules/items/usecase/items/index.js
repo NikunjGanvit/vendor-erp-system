@@ -27,8 +27,6 @@ const createItem = makeCreateItem({
 
 const getItems = makeGetItems({
   itemDb,
-  buildFilterV2: require('eva-utilities').buildFilterV2,
-  buildSort: require('eva-utilities').buildSort,
   NotFoundError,
   UnknownError,
 });
