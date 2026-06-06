@@ -1,24 +1,59 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+import api from './api';
 
 const authService = {
   login: async (email, password) => {
-    try {
-      const response = await axios.post(`${API_URL}/auth/login`, { email, password });
-      return response.data;
-    } catch (error) {
-      throw error.response?.data?.message || 'Failed to login. Please check your credentials.';
-    }
+    // In a real scenario:
+    // const response = await api.post('/auth/login', { email, password });
+    // return response.data;
+
+    // MOCK IMPLEMENTATION
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (email === 'admin@nexus.com' && password === 'admin123') {
+          resolve({
+            token: 'mock-jwt-token-admin',
+            user: { id: 1, name: 'Admin User', email, role: 'Admin' }
+          });
+        } else if (email === 'procurement@nexus.com') {
+          resolve({
+             token: 'mock-jwt-token-po',
+             user: { id: 2, name: 'PO User', email, role: 'Procurement Officer' }
+          });
+        } else if (email === 'manager@nexus.com') {
+          resolve({
+             token: 'mock-jwt-token-manager',
+             user: { id: 3, name: 'Manager User', email, role: 'Manager' }
+          });
+        } else if (email === 'vendor@nexus.com') {
+          resolve({
+             token: 'mock-jwt-token-vendor',
+             user: { id: 4, name: 'Vendor Company', email, role: 'Vendor' }
+          });
+        } else {
+          // generic fallback mock login for testing
+          resolve({
+            token: 'mock-jwt-token-generic',
+            user: { id: 5, name: 'Test User', email, role: 'Admin' }
+          });
+        }
+      }, 1000);
+    });
   },
-  
+
   signup: async (email, password) => {
-    try {
-      const response = await axios.post(`${API_URL}/auth/signup`, { email, password });
-      return response.data;
-    } catch (error) {
-      throw error.response?.data?.message || 'Failed to create account. Please try again later.';
-    }
+    // In a real scenario:
+    // const response = await api.post('/auth/signup', { email, password });
+    // return response.data;
+
+    // MOCK IMPLEMENTATION
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          token: 'mock-jwt-token-new',
+          user: { id: 99, name: 'New Workspace', email, role: 'Admin' }
+        });
+      }, 1500);
+    });
   }
 };
 
