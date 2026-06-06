@@ -3,6 +3,9 @@
 const express = require('express');
 const router = express.Router();
 const userRoutes = require('./user-routes');
+const itemRoutes = require('./item-routes');
+const vendorItemRoutes = require('./vendor-item.routes');
+const vendorRoutes = require('./vendor-routes');
 const authRoutes = require('./auth-routes');
 
 router.get('/', (req, res) => {
@@ -10,6 +13,9 @@ router.get('/', (req, res) => {
 });
 
 router.use('/', userRoutes);
+router.use('/', itemRoutes);
+router.use('/vendor-items', vendorItemRoutes);
+router.use('/', vendorRoutes);
 router.use('/', authRoutes);
 
 module.exports = router;
