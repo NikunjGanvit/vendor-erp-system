@@ -107,7 +107,7 @@ module.exports = function ({ sequelize, UnknownError }) {
         LIMIT 1
       `;
       const [row] = await sequelize.query(sql, {
-        replacements: [rfq_number],
+        bind: [rfq_number],
         type: sequelize.QueryTypes.SELECT,
       });
 
@@ -147,7 +147,7 @@ module.exports = function ({ sequelize, UnknownError }) {
       `;
 
       const [rfqMaster] = await sequelize.query(insertMasterSql, {
-        replacements: [
+        bind: [
           rfq_number,
           title,
           procurement_officer_id,
@@ -174,7 +174,7 @@ module.exports = function ({ sequelize, UnknownError }) {
           `;
 
           await sequelize.query(insertDetailSql, {
-            replacements: [
+            bind: [
               rfqMaster.id,
               detail.item_description,
               detail.quantity,
@@ -213,7 +213,7 @@ module.exports = function ({ sequelize, UnknownError }) {
 
       const countSql = `SELECT COUNT(*) as total FROM public.rfq_master ${whereCondition}`;
       const [countResult] = await sequelize.query(countSql, {
-        replacements: filterParams,
+        bind: filterParams,
         type: sequelize.QueryTypes.SELECT,
       });
 
@@ -229,7 +229,7 @@ module.exports = function ({ sequelize, UnknownError }) {
       `;
 
       const rows = await sequelize.query(dataSql, {
-        replacements: [...filterParams, limit, offset],
+        bind: [...filterParams, limit, offset],
         type: sequelize.QueryTypes.SELECT,
       });
 
@@ -258,7 +258,7 @@ module.exports = function ({ sequelize, UnknownError }) {
         LIMIT 1
       `;
       const [row] = await sequelize.query(sql, {
-        replacements: [id],
+        bind: [id],
         type: sequelize.QueryTypes.SELECT,
       });
 
@@ -282,7 +282,7 @@ module.exports = function ({ sequelize, UnknownError }) {
         LIMIT 1
       `;
       const [master] = await sequelize.query(masterSql, {
-        replacements: [id],
+        bind: [id],
         type: sequelize.QueryTypes.SELECT,
       });
 
@@ -295,7 +295,7 @@ module.exports = function ({ sequelize, UnknownError }) {
         WHERE rfq_master_id = $1
       `;
       const details = await sequelize.query(detailsSql, {
-        replacements: [id],
+        bind: [id],
         type: sequelize.QueryTypes.SELECT,
       });
 
@@ -313,7 +313,7 @@ module.exports = function ({ sequelize, UnknownError }) {
       const detailIds = details.map((d) => d.id);
       const quotations = detailIds.length > 0
         ? await sequelize.query(quotationsSql, {
-          replacements: [detailIds],
+          bind: [detailIds],
           type: sequelize.QueryTypes.SELECT,
         })
         : [];
@@ -376,7 +376,7 @@ module.exports = function ({ sequelize, UnknownError }) {
       `;
 
       const [updatedRow] = await sequelize.query(sql, {
-        replacements: params,
+        bind: params,
         type: sequelize.QueryTypes.SELECT,
       });
 
@@ -395,7 +395,7 @@ module.exports = function ({ sequelize, UnknownError }) {
       // Delete RFQ Details first
       const deleteDetailsSql = 'DELETE FROM public.rfq_details WHERE rfq_master_id = $1';
       await sequelize.query(deleteDetailsSql, {
-        replacements: [id],
+        bind: [id],
         type: sequelize.QueryTypes.DELETE,
         transaction: t,
       });
@@ -403,7 +403,7 @@ module.exports = function ({ sequelize, UnknownError }) {
       // Delete RFQ Master
       const deleteMasterSql = 'DELETE FROM public.rfq_master WHERE id = $1 RETURNING *';
       const [deletedRow] = await sequelize.query(deleteMasterSql, {
-        replacements: [id],
+        bind: [id],
         type: sequelize.QueryTypes.SELECT,
         transaction: t,
       });

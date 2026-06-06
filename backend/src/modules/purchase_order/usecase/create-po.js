@@ -131,7 +131,7 @@ module.exports = function ({
         `;
 
         const [createdRFQ] = await sequelize.query(rfqInsertSql, {
-          replacements: [
+          bind: [
             rfqData.rfq_number,
             rfqData.title,
             rfqData.procurement_officer_id,
@@ -157,7 +157,7 @@ module.exports = function ({
           `;
 
           await sequelize.query(rfqDetailSql, {
-            replacements: [
+            bind: [
               createdRFQ.id,
               detail.item_description,
               detail.quantity,
@@ -178,7 +178,7 @@ module.exports = function ({
         `;
 
         await sequelize.query(linkSql, {
-          replacements: [createdRFQ.id, createdPO.id],
+          bind: [createdRFQ.id, createdPO.id],
           type: sequelize.QueryTypes.UPDATE,
           transaction: t,
         });

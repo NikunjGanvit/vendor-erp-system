@@ -107,7 +107,7 @@ module.exports = function ({ sequelize, UnknownError }) {
         LIMIT 1
       `;
       const [row] = await sequelize.query(sql, {
-        replacements: [po_number],
+        bind: [po_number],
         type: sequelize.QueryTypes.SELECT,
       });
 
@@ -143,19 +143,18 @@ module.exports = function ({ sequelize, UnknownError }) {
       // Create PO Header
       const insertHeaderSql = `
         INSERT INTO public.po_header (
-          po_number, rfq_master_id, vendor_id, procurement_officer_id, 
+          po_number, rfq_master_id, procurement_officer_id, 
           status, po_date, delivery_date, total_amount, tax_amount, 
           grand_total, currency, notes, approval_status, created_at, updated_at
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
         RETURNING *
       `;
 
       const [poHeader] = await sequelize.query(insertHeaderSql, {
-        replacements: [
+        bind: [
           po_number,
           rfq_master_id || null,
-          vendor_id,
           procurement_officer_id,
           status || 'DRAFT',
           po_date,
@@ -184,7 +183,7 @@ module.exports = function ({ sequelize, UnknownError }) {
           `;
 
           await sequelize.query(insertDetailSql, {
-            replacements: [
+            bind: [
               poHeader.id,
               detail.rfq_details_id || null,
               detail.item_id,
@@ -226,7 +225,7 @@ module.exports = function ({ sequelize, UnknownError }) {
 
       const countSql = `SELECT COUNT(*) as total FROM public.po_header ${whereCondition}`;
       const [countResult] = await sequelize.query(countSql, {
-        replacements: filterParams,
+        bind: filterParams,
         type: sequelize.QueryTypes.SELECT,
       });
 
@@ -244,7 +243,7 @@ module.exports = function ({ sequelize, UnknownError }) {
       `;
 
       const rows = await sequelize.query(dataSql, {
-        replacements: [...filterParams, limit, offset],
+        bind: [...filterParams, limit, offset],
         type: sequelize.QueryTypes.SELECT,
       });
 
@@ -275,7 +274,7 @@ module.exports = function ({ sequelize, UnknownError }) {
         LIMIT 1
       `;
       const [row] = await sequelize.query(sql, {
-        replacements: [id],
+        bind: [id],
         type: sequelize.QueryTypes.SELECT,
       });
 
@@ -301,7 +300,7 @@ module.exports = function ({ sequelize, UnknownError }) {
         LIMIT 1
       `;
       const [header] = await sequelize.query(headerSql, {
-        replacements: [id],
+        bind: [id],
         type: sequelize.QueryTypes.SELECT,
       });
 
@@ -314,7 +313,7 @@ module.exports = function ({ sequelize, UnknownError }) {
         WHERE po_header_id = $1
       `;
       const details = await sequelize.query(detailsSql, {
-        replacements: [id],
+        bind: [id],
         type: sequelize.QueryTypes.SELECT,
       });
 
@@ -367,7 +366,7 @@ module.exports = function ({ sequelize, UnknownError }) {
       `;
 
       const [updatedRow] = await sequelize.query(sql, {
-        replacements: params,
+        bind: params,
         type: sequelize.QueryTypes.SELECT,
       });
 
@@ -386,7 +385,7 @@ module.exports = function ({ sequelize, UnknownError }) {
       // Delete PO Details first
       const deleteDetailsSql = 'DELETE FROM public.po_details WHERE po_header_id = $1';
       await sequelize.query(deleteDetailsSql, {
-        replacements: [id],
+        bind: [id],
         type: sequelize.QueryTypes.DELETE,
         transaction: t,
       });
@@ -394,7 +393,7 @@ module.exports = function ({ sequelize, UnknownError }) {
       // Delete PO Header
       const deleteHeaderSql = 'DELETE FROM public.po_header WHERE id = $1 RETURNING *';
       const [deletedRow] = await sequelize.query(deleteHeaderSql, {
-        replacements: [id],
+        bind: [id],
         type: sequelize.QueryTypes.SELECT,
         transaction: t,
       });
