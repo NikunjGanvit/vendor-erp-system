@@ -2,9 +2,20 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import DashboardLayout from './components/DashboardLayout';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import AdminPage from './pages/AdminPage';
+import Profile from './pages/Profile';
+import UserList from './pages/admin/user-management/List';
+import CreateUser from './pages/admin/user-management/Create';
+import EditUser from './pages/admin/user-management/Edit';
+import ViewUser from './pages/admin/user-management/View';
+import RoleList from './pages/admin/roles/List';
+import CreateRole from './pages/admin/roles/Create';
+import EditRole from './pages/admin/roles/Edit';
+import ViewRole from './pages/admin/roles/View';
 
 function PublicRoute({ children }) {
   const { user, loading } = useAuth();
@@ -50,10 +61,24 @@ function AppContent() {
         path="/"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <DashboardLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route index element={<Dashboard />} />
+        <Route path="profile" element={<Profile />} />
+        <Route path="admin">
+          <Route index element={<AdminPage />} />
+          <Route path="users" element={<UserList />} />
+          <Route path="users/create" element={<CreateUser />} />
+          <Route path="users/edit/:id" element={<EditUser />} />
+          <Route path="users/view/:id" element={<ViewUser />} />
+          <Route path="roles" element={<RoleList />} />
+          <Route path="roles/create" element={<CreateRole />} />
+          <Route path="roles/edit/:id" element={<EditRole />} />
+          <Route path="roles/view/:id" element={<ViewRole />} />
+        </Route>
+      </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
