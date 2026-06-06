@@ -5,6 +5,7 @@ module.exports = function ({ sequelize }) {
     findByEmail,
     findByPhone,
     findByEmployeeId,
+    findForAuth,
     createUser,
   };
 
@@ -12,6 +13,25 @@ module.exports = function ({ sequelize }) {
     try {
       const sql = `
         SELECT id, fullname, email, phone_number, is_active, role, unit, company_id, employee_type, employee_id, designation
+        FROM public.user_master
+        WHERE email = $1 AND deleted_at IS NULL
+        LIMIT 1
+      `;
+      const result = await sequelize.query(sql, {
+        bind: [email],
+        type: sequelize.QueryTypes.SELECT,
+      });
+      return result[0] || null;
+    } catch (err) {
+      logger?.error(err);
+      throw err;
+    }
+  }
+
+  async function findForAuth({ email, logger }) {
+    try {
+      const sql = `
+        SELECT id, fullname, email, password, phone_number, is_active, role, unit, company_id, employee_type, employee_id, designation
         FROM public.user_master
         WHERE email = $1 AND deleted_at IS NULL
         LIMIT 1
@@ -87,7 +107,7 @@ module.exports = function ({ sequelize }) {
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
         RETURNING
           id,
-          fullname,
+          fullname,makeMeAction
           email,
           phone_number,
           is_active,
@@ -95,7 +115,7 @@ module.exports = function ({ sequelize }) {
           is_employee,
           role,
           unit,
-          company_id,
+          company_id,makeMeAction
           employee_type,
           employee_id,
           designation,

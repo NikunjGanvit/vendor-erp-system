@@ -83,4 +83,10 @@ module.exports = {
       crossOriginResourcePolicy: { policy: 'cross-origin' },
     },
   },
+
+  auth: {
+    jwtSecret: process.env.JWT_SECRET || 'supersecretjwtkey123',
+    jwtExpiresIn: process.env.JWT_EXPIRES_IN || '24h',
+    cookieName: 'token',
+  },
 };
