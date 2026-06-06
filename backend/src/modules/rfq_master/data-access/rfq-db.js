@@ -207,24 +207,32 @@ module.exports = function ({ sequelize, UnknownError }) {
       const { clause: sortClause, params: sortParams } = normalizeSort(sort);
 
       let whereCondition = 'WHERE 1=1';
-      if (filterClause) {
-        whereCondition += ` AND ${filterClause}`;
-      }
+     
 
       const countSql = `SELECT COUNT(*) as total FROM public.rfq_master ${whereCondition}`;
       const [countResult] = await sequelize.query(countSql, {
         bind: filterParams,
         type: sequelize.QueryTypes.SELECT,
       });
+        const aliasedFilterClause = filterClause
+        ? filterClause.replace(/\b(public\.)?rfq_master\b/g, 'rm')
+        : '';
+      const aliasedSortClause = sortClause
+        ? sortClause.replace(/\b(public\.)?rfq_master\b/g, 'rm')
+        : sortClause;
+
+       if (filterClause) {
+        whereCondition += ` AND ${aliasedFilterClause}`;
+      }
 
       const dataSql = `
         SELECT 
           rm.*,
-          um.name as procurement_officer_name
+          um.fullname as procurement_officer_name
         FROM public.rfq_master rm
         LEFT JOIN user_master um ON rm.procurement_officer_id = um.id
         ${whereCondition}
-        ORDER BY ${sortClause}
+        ORDER BY ${aliasedSortClause}
         LIMIT $${filterParams.length + 1} OFFSET $${filterParams.length + 2}
       `;
 
@@ -251,8 +259,8 @@ module.exports = function ({ sequelize, UnknownError }) {
       const sql = `
         SELECT 
           rm.*,
-          um.name as procurement_officer_name
-        FROM public.rfq_master rm
+          um.fullname as procurement_officer_name
+        FROM rfq_master rm
         LEFT JOIN user_master um ON rm.procurement_officer_id = um.id
         WHERE rm.id = $1
         LIMIT 1
@@ -275,8 +283,8 @@ module.exports = function ({ sequelize, UnknownError }) {
       const masterSql = `
         SELECT 
           rm.*,
-          um.name as procurement_officer_name
-        FROM public.rfq_master rm
+          um.fullname as procurement_officer_name
+        FROM rfq_master rm
         LEFT JOIN user_master um ON rm.procurement_officer_id = um.id
         WHERE rm.id = $1
         LIMIT 1
@@ -291,7 +299,7 @@ module.exports = function ({ sequelize, UnknownError }) {
       }
 
       const detailsSql = `
-        SELECT * FROM public.rfq_details
+        SELECT * FROM rfq_details
         WHERE rfq_master_id = $1
       `;
       const details = await sequelize.query(detailsSql, {
