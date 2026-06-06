@@ -8,13 +8,13 @@ const makeDeleteItem = require('./delete-item');
 
 const { itemDb } = require('../../data-access');
 const Joi = require('joi');
-const sequelize = require('../../../config/db');
+const sequelize = require('../../../../config/db');
 const {
   UnknownError,
   ValidationError,
   ConflictError,
   NotFoundError,
-} = require('../../../utils/errors');
+} = require('../../../../utils/errors');
 
 const createItem = makeCreateItem({
   itemDb,
