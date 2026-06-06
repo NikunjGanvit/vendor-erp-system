@@ -1,9 +1,10 @@
 'use strict';
 
-const { login, register, verifyToken } = require('./auth');
+const { login, register, verifyToken, changePassword } = require('./auth');
 
 module.exports = {
   login,
   register,
   verifyToken,
+  changePassword,
 };

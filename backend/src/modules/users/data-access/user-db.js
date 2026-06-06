@@ -134,7 +134,7 @@ module.exports = function ({ sequelize }) {
         userData.email || null,
         userData.password || null,
         userData.phone_number || null,
-        userData.is_active ?? false,
+        userData.is_active ?? true,
         userData.meta_data ? JSON.stringify(userData.meta_data) : '{}',
         userData.is_employee ?? false,
         userData.role_id || null,

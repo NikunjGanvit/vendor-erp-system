@@ -18,7 +18,6 @@ module.exports = function ({
         id: Joi.number().integer().positive().required(),
         fullname: Joi.string().min(3).max(50).optional(),
         email: Joi.string().email().max(40).allow(null, '').optional(),
-        password: Joi.string().min(6).max(100).allow(null, '').optional(),
         phone_number: Joi.string().max(20).allow(null, '').optional(),
         is_active: Joi.boolean().optional(),
         meta_data: Joi.object().optional(),
@@ -71,16 +70,6 @@ module.exports = function ({
         const dup = await userDb.findByEmployeeId({ employee_id: processedUser.employee_id, logger });
         if (dup && dup.id !== existingUser.id) {
           throw new ConflictError('Employee ID already exists');
-        }
-      }
-
-      // Password Hashing if updated
-      if (processedUser.password) {
-        try {
-          processedUser.password = await bcrypt.hash(processedUser.password, 10);
-        } catch (err) {
-          logger?.error(err);
-          throw new UnknownError('Failed to process password');
         }
       }
 
