@@ -70,6 +70,7 @@ module.exports = function ({
       }
 
       const normalizedPO = value;
+      // console.log('Normalized PO Data:', normalizedPO);
 
       // Check if PO number already exists
       const existingByNumber = await poDb.findByPONumber({
