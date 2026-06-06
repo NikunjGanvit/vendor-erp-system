@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import authService from '../services/authService';
+import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -8,6 +9,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,11 +19,11 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // const response = await authService.login(email, password);
-      // if (response && response.token) {
-      //   localStorage.setItem('token', response.token);
-      // }
-      navigate('/dashboard');
+      const response = await authService.login(email, password);
+      if (response && response.token) {
+        login(response.user, response.token);
+        navigate('/dashboard');
+      }
     } catch (err) {
       setError(typeof err === 'string' ? err : 'An unexpected error occurred.');
     } finally {
