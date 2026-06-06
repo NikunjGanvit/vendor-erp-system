@@ -18,12 +18,12 @@ module.exports = function ({ poDb, Joi, UnknownError }) {
           Joi.string(),
           Joi.array(),
           Joi.object()
-        ).optional(),
+        ).optional().allow(null,""),
         sort: Joi.alternatives().try(
           Joi.string(),
           Joi.array(),
           Joi.object()
-        ).optional(),
+        ).optional().allow(null,""),
       });
 
       const { error, value } = schema.validate(

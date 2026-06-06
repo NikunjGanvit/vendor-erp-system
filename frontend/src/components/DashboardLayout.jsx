@@ -44,6 +44,24 @@ export default function DashboardLayout() {
         </svg>
       ),
     },
+    {
+      name: 'Purchase Orders',
+      path: '/purchase-orders',
+      icon: (
+        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-6a2 2 0 012-2h6M9 17H7a2 2 0 01-2-2V7a2 2 0 012-2h10" />
+        </svg>
+      ),
+    },
+    {
+      name: 'RFQs',
+      path: '/rfqs',
+      icon: (
+        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6M9 16h6M9 8h6M4 6h16v12H4z" />
+        </svg>
+      ),
+    },
   ];
 
   return (

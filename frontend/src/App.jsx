@@ -16,6 +16,12 @@ import RoleList from './pages/admin/roles/List';
 import CreateRole from './pages/admin/roles/Create';
 import EditRole from './pages/admin/roles/Edit';
 import ViewRole from './pages/admin/roles/View';
+import POList from './pages/purchase-orders/List';
+import POCreate from './pages/purchase-orders/Create';
+import POView from './pages/purchase-orders/View';
+import RFQList from './pages/rfqs/List';
+import RFQCreate from './pages/rfqs/Create';
+import RFQView from './pages/rfqs/View';
 
 function PublicRoute({ children }) {
   const { user, loading } = useAuth();
@@ -78,6 +84,16 @@ function AppContent() {
           <Route path="roles/edit/:id" element={<EditRole />} />
           <Route path="roles/view/:id" element={<ViewRole />} />
         </Route>
+        <Route path="purchase-orders">
+          <Route index element={<POList />} />
+          <Route path="create" element={<POCreate />} />
+          <Route path=":id" element={<POView />} />
+        </Route>
+        <Route path="rfqs">
+          <Route index element={<RFQList />} />
+          <Route path="create" element={<RFQCreate />} />
+          <Route path=":id" element={<RFQView />} />
+        </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
@@ -93,3 +109,4 @@ export default function App() {
     </AuthProvider>
   );
 }
+

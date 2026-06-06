@@ -218,6 +218,7 @@ module.exports = function ({ sequelize, UnknownError }) {
       const { clause: filterClause, params: filterParams } = normalizeFilter(filter);
       const { clause: sortClause, params: sortParams } = normalizeSort(sort);
 
+      // Build separate where/sort clauses for count (no alias) and data (uses alias 'ph')
       let whereCondition = 'WHERE 1=1';
       if (filterClause) {
         whereCondition += ` AND ${filterClause}`;
@@ -229,16 +230,27 @@ module.exports = function ({ sequelize, UnknownError }) {
         type: sequelize.QueryTypes.SELECT,
       });
 
+      // Replace any table references to po_header or public.po_header with alias 'ph' for the data query
+      const aliasedFilterClause = filterClause
+        ? filterClause.replace(/\b(public\.)?po_header\b/g, 'ph')
+        : '';
+      const aliasedSortClause = sortClause
+        ? sortClause.replace(/\b(public\.)?po_header\b/g, 'ph')
+        : sortClause;
+
+      let whereConditionForData = 'WHERE 1=1';
+      if (aliasedFilterClause) {
+        whereConditionForData += ` AND ${aliasedFilterClause}`;
+      }
+
       const dataSql = `
         SELECT 
           ph.*,
-          vm.name as vendor_name,
-          um.name as procurement_officer_name
+          um.fullname as procurement_officer_name
         FROM public.po_header ph
-        LEFT JOIN vendor_master vm ON ph.vendor_id = vm.id
         LEFT JOIN user_master um ON ph.procurement_officer_id = um.id
-        ${whereCondition}
-        ORDER BY ${sortClause}
+        ${whereConditionForData}
+        ORDER BY ${aliasedSortClause}
         LIMIT $${filterParams.length + 1} OFFSET $${filterParams.length + 2}
       `;
 
@@ -265,10 +277,8 @@ module.exports = function ({ sequelize, UnknownError }) {
       const sql = `
         SELECT 
           ph.*,
-          vm.name as vendor_name,
-          um.name as procurement_officer_name
+          um.fullname as procurement_officer_name
         FROM public.po_header ph
-        LEFT JOIN vendor_master vm ON ph.vendor_id = vm.id
         LEFT JOIN user_master um ON ph.procurement_officer_id = um.id
         WHERE ph.id = $1
         LIMIT 1
@@ -291,10 +301,8 @@ module.exports = function ({ sequelize, UnknownError }) {
       const headerSql = `
         SELECT 
           ph.*,
-          vm.name as vendor_name,
-          um.name as procurement_officer_name
+          um.fullname as procurement_officer_name
         FROM public.po_header ph
-        LEFT JOIN vendor_master vm ON ph.vendor_id = vm.id
         LEFT JOIN user_master um ON ph.procurement_officer_id = um.id
         WHERE ph.id = $1
         LIMIT 1
